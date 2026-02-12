@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getDb } from "@/lib/db";
 
 // GET /api/games - list games
 export async function GET() {
+  const prisma = await getDb();
   const games = await prisma.game.findMany({
     orderBy: { createdAt: "desc" },
     include: { players: true },
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const prisma = await getDb();
     const game = await prisma.game.create({
       data: {
         name,

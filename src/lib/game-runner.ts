@@ -3,9 +3,10 @@ import type { GameConfig, PokerAction } from "@/lib/engine/types";
 import { createAgent, type AgentConfig } from "@/agents/registry";
 import type { PokerAgent } from "@/agents/base-agent";
 import { gameEventBus, activeGames, type ActiveGame } from "@/lib/game-events";
-import { prisma } from "@/lib/db";
+import { getDb } from "@/lib/db";
 
 export async function startGame(gameId: string, agentConfigs: AgentConfig[]) {
+  const prisma = await getDb();
   const game = await prisma.game.findUnique({
     where: { id: gameId },
     include: { players: true },

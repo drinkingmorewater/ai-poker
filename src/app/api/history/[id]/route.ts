@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getDb } from "@/lib/db";
 
 export async function GET(
   _req: NextRequest,
@@ -7,6 +7,7 @@ export async function GET(
 ) {
   const { id } = await params;
 
+  const prisma = await getDb();
   const game = await prisma.game.findUnique({
     where: { id },
     include: {

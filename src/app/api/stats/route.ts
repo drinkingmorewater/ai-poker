@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getDb } from "@/lib/db";
 
 export async function GET() {
+  const prisma = await getDb();
   const games = await prisma.game.findMany({
     where: { status: "finished" },
     orderBy: { finishedAt: "desc" },

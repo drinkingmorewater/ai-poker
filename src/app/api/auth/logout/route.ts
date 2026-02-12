@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { clearSession } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
-  await clearSession();
-  return NextResponse.redirect(new URL("/", req.nextUrl.origin));
+  const response = NextResponse.redirect(new URL("/", req.nextUrl.origin));
+  response.cookies.set("ai_poker_session", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+  response.cookies.set("ai_poker_user", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+  return response;
 }
