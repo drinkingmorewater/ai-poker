@@ -1,20 +1,32 @@
 import type { SecondMeApiResponse, SecondMeUserInfo } from "@/types/api";
 
-const API_BASE = process.env.SECONDME_API_BASE_URL || "https://app.mindos.com/gate/lab";
+/** Strip newlines, carriage returns, and leading/trailing whitespace from env vars */
+function cleanEnv(key: string, fallback = ""): string {
+  return (process.env[key] || fallback).replace(/[\r\n\t]/g, "").trim();
+}
+
+const API_BASE = cleanEnv("SECONDME_API_BASE_URL", "https://app.mindos.com/gate/lab");
+
+/** Build the redirect URI from the request origin */
+export function getRedirectUri(origin: string): string {
+  const envUri = cleanEnv("SECONDME_REDIRECT_URI");
+  if (envUri) return envUri;
+  return `${origin}/api/auth/callback`;
+}
 
 /**
  * Exchange authorization code for tokens
  */
-export async function exchangeCodeForToken(code: string) {
+export async function exchangeCodeForToken(code: string, redirectUri: string) {
   const res = await fetch(`${API_BASE}/api/oauth/token/code`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: process.env.SECONDME_REDIRECT_URI!,
-      client_id: process.env.SECONDME_CLIENT_ID!,
-      client_secret: process.env.SECONDME_CLIENT_SECRET!,
+      redirect_uri: redirectUri,
+      client_id: cleanEnv("SECONDME_CLIENT_ID"),
+      client_secret: cleanEnv("SECONDME_CLIENT_SECRET"),
     }),
   });
 
@@ -138,13 +150,18 @@ export async function callChatAPI(
 /**
  * Build the OAuth authorization URL
  */
-export function buildAuthUrl(state?: string): string {
-  const oauthUrl = process.env.SECONDME_OAUTH_URL || "https://go.second.me/oauth/";
+export function buildAuthUrl(origin: string, state?: string): string {
+  const oauthUrl = cleanEnv("SECONDME_OAUTH_URL", "https://go.second.me/oauth/");
+  const clientId = cleanEnv("SECONDME_CLIENT_ID");
+  const redirectUri = getRedirectUri(origin);
   const params = new URLSearchParams({
-    client_id: process.env.SECONDME_CLIENT_ID!,
-    redirect_uri: process.env.SECONDME_REDIRECT_URI!,
+    client_id: clientId,
+    redirect_uri: redirectUri,
     response_type: "code",
     ...(state ? { state } : {}),
   });
-  return `${oauthUrl}?${params.toString()}`;
+  // Final safety: strip any stray whitespace/newlines from the full URL
+  return `${oauthUrl}?${params.toString()}`.replace(/[\r\n\s]+/g, (m) =>
+    m === " " ? "%20" : ""
+  );
 }

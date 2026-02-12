@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { LoginButton } from "@/components/LoginButton";
 import Link from "next/link";
 
 interface PlayerConfig {
@@ -98,57 +99,88 @@ export default function CreateGamePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-3">
-        <div className="max-w-3xl mx-auto flex items-center gap-4">
-          <Link href="/" className="text-lg font-bold text-gray-800 hover:text-emerald-600 transition-colors">
-            AI 德扑
-          </Link>
-          <span className="text-gray-300">|</span>
-          <span className="text-sm text-gray-500">创建新游戏</span>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-950 to-gray-900 text-white">
+      <header className="border-b border-white/10 backdrop-blur-sm px-6 py-3">
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-lg font-bold hover:text-emerald-400 transition-colors">
+              AI 德扑
+            </Link>
+            <span className="text-gray-600">|</span>
+            <span className="text-sm text-gray-400">创建新游戏</span>
+          </div>
+          <LoginButton variant="dark" />
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto p-6">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
+        {/* Login prompt */}
+        {!user && (
+          <div className="mb-6 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10 text-center">
+            <p className="text-yellow-300 mb-2">登录 SecondMe 后可以使用 AI 分身参战，赢取欢乐豆！</p>
+            <button
+              onClick={() => { window.location.href = "/api/auth/login"; }}
+              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 rounded-lg text-sm font-medium transition-colors"
+            >
+              SecondMe 登录
+            </button>
+          </div>
+        )}
+
+        {user && (
+          <div className="mb-6 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold">
+                {(user.name || "U")[0]}
+              </div>
+              <div>
+                <div className="font-medium">{user.name || "用户"}</div>
+                <div className="text-sm text-yellow-400">{user.beans?.toLocaleString()} 欢乐豆</div>
+              </div>
+            </div>
+            <span className="text-sm text-gray-400">游戏结束后根据盈亏结算欢乐豆</span>
+          </div>
+        )}
+
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-6">
           {/* Game name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">游戏名称</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">游戏名称</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
             />
           </div>
 
           {/* Game settings */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">初始筹码</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">初始筹码</label>
               <input
                 type="number"
                 value={startingChips}
                 onChange={(e) => setStartingChips(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">小盲注</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">小盲注</label>
               <input
                 type="number"
                 value={smallBlind}
                 onChange={(e) => setSmallBlind(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">大盲注</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">大盲注</label>
               <input
                 type="number"
                 value={bigBlind}
                 onChange={(e) => setBigBlind(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm"
               />
             </div>
           </div>
@@ -156,13 +188,13 @@ export default function CreateGamePage() {
           {/* Players */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-700">玩家 ({players.length}/9)</label>
+              <label className="text-sm font-medium text-gray-300">玩家 ({players.length}/9)</label>
               <div className="flex gap-2">
                 {user && (
                   <button
                     onClick={addMyAgent}
                     disabled={players.length >= 9}
-                    className="px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                    className="px-3 py-1 text-xs font-medium bg-emerald-500/20 text-emerald-300 rounded-lg hover:bg-emerald-500/30 transition-colors disabled:opacity-50 border border-emerald-500/30"
                   >
                     + 我的 AI 分身
                   </button>
@@ -170,7 +202,7 @@ export default function CreateGamePage() {
                 <button
                   onClick={addPlayer}
                   disabled={players.length >= 9}
-                  className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  className="px-3 py-1 text-xs font-medium bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50 border border-white/20"
                 >
                   + 随机玩家
                 </button>
@@ -179,12 +211,12 @@ export default function CreateGamePage() {
 
             <div className="space-y-2">
               {players.map((p, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-xs text-gray-400 w-8">#{i + 1}</span>
+                <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
+                  <span className="text-xs text-gray-500 w-8">#{i + 1}</span>
                   <select
                     value={p.agentType}
                     onChange={(e) => updatePlayer(i, "agentType", e.target.value)}
-                    className="px-2 py-1.5 border border-gray-300 rounded-lg text-sm bg-white"
+                    className="px-2 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm"
                   >
                     <option value="random">随机策略</option>
                     {user && <option value="secondme">SecondMe AI</option>}
@@ -193,13 +225,13 @@ export default function CreateGamePage() {
                     type="text"
                     value={p.agentName}
                     onChange={(e) => updatePlayer(i, "agentName", e.target.value)}
-                    className="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
+                    className="flex-1 px-2 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm"
                     placeholder="玩家名称"
                   />
                   <button
                     onClick={() => removePlayer(i)}
                     disabled={players.length <= 2}
-                    className="text-red-400 hover:text-red-600 disabled:opacity-30 text-sm"
+                    className="text-red-400 hover:text-red-300 disabled:opacity-30 text-sm"
                   >
                     移除
                   </button>
@@ -215,16 +247,16 @@ export default function CreateGamePage() {
               id="autoStart"
               checked={autoStart}
               onChange={(e) => setAutoStart(e.target.checked)}
-              className="rounded border-gray-300"
+              className="rounded border-gray-600 bg-white/10"
             />
-            <label htmlFor="autoStart" className="text-sm text-gray-600">创建后自动开始</label>
+            <label htmlFor="autoStart" className="text-sm text-gray-400">创建后自动开始</label>
           </div>
 
           {/* Submit */}
           <button
             onClick={handleSubmit}
             disabled={loading || players.length < 2}
-            className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+            className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-500 transition-colors disabled:opacity-50"
           >
             {loading ? "创建中..." : "创建游戏"}
           </button>

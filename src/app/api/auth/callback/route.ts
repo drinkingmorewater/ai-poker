@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeCodeForToken, getUserInfo } from "@/lib/secondme";
+import { exchangeCodeForToken, getUserInfo, getRedirectUri } from "@/lib/secondme";
 import { setSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -13,8 +13,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Exchange code for tokens
-    const tokens = await exchangeCodeForToken(code);
+    const redirectUri = getRedirectUri(req.nextUrl.origin);
+
+    // Exchange code for tokens (redirect_uri must match the one used in authorization)
+    const tokens = await exchangeCodeForToken(code, redirectUri);
 
     // Get user info
     const userInfo = await getUserInfo(tokens.accessToken);

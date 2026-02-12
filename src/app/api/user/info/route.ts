@@ -12,5 +12,8 @@ export async function GET() {
     name: user.name,
     email: user.email,
     avatarUrl: user.avatarUrl,
+    beans: user.beans,
+    totalWins: user.totalWins,
+    totalGames: user.totalGames,
   });
 }

@@ -7,6 +7,9 @@ interface User {
   name: string | null;
   email: string | null;
   avatarUrl: string | null;
+  beans: number;
+  totalWins: number;
+  totalGames: number;
 }
 
 export function useAuth() {

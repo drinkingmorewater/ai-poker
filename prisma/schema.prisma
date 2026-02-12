@@ -16,6 +16,9 @@ model User {
   accessToken    String       @map("access_token")
   refreshToken   String       @map("refresh_token")
   tokenExpiresAt DateTime     @map("token_expires_at")
+  beans          Int          @default(10000)
+  totalWins      Int          @default(0) @map("total_wins")
+  totalGames     Int          @default(0) @map("total_games")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
   gamePlayers    GamePlayer[]

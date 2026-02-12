@@ -100,8 +100,10 @@ export async function startGame(gameId: string, agentConfigs: AgentConfig[]) {
       data: { status: "finished", finishedAt: new Date() },
     });
 
-    // Update player stats
+    // Update player stats and award beans
     const snapshot = engine.getSnapshot(true);
+    const winner = snapshot.players.reduce((a, b) => (a.chips > b.chips ? a : b));
+
     for (const p of snapshot.players) {
       await prisma.gamePlayer.updateMany({
         where: { gameId, seatNumber: p.seatNumber },
@@ -111,6 +113,21 @@ export async function startGame(gameId: string, agentConfigs: AgentConfig[]) {
           status: p.chips > 0 ? "active" : "eliminated",
         },
       });
+
+      // Update user beans and stats if player is linked to a user
+      const gp = game.players.find((gpl) => gpl.seatNumber === p.seatNumber);
+      if (gp?.userId) {
+        const profit = p.chips - config.startingChips;
+        const isWinner = p.seatNumber === winner.seatNumber;
+        await prisma.user.update({
+          where: { id: gp.userId },
+          data: {
+            beans: { increment: profit },
+            totalGames: { increment: 1 },
+            totalWins: { increment: isWinner ? 1 : 0 },
+          },
+        });
+      }
     }
   }).catch(async (err) => {
     console.error(`Game ${gameId} error:`, err);
