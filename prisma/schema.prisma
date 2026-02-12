@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String       @id @default(cuid())
+  secondmeUserId String       @unique @map("secondme_user_id")
+  name           String?
+  email          String?
+  avatarUrl      String?      @map("avatar_url")
+  accessToken    String       @map("access_token")
+  refreshToken   String       @map("refresh_token")
+  tokenExpiresAt DateTime     @map("token_expires_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  gamePlayers    GamePlayer[]
+
+  @@map("users")
+}
+
+model Game {
+  id              String       @id @default(cuid())
+  name            String
+  status          String       @default("waiting")
+  startingChips   Int          @default(1000) @map("starting_chips")
+  smallBlind      Int          @default(10) @map("small_blind")
+  bigBlind        Int          @default(20) @map("big_blind")
+  currentHand     Int          @default(0) @map("current_hand")
+  speedMultiplier Float        @default(1.0) @map("speed_multiplier")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  startedAt       DateTime?    @map("started_at")
+  finishedAt      DateTime?    @map("finished_at")
+  players         GamePlayer[]
+  hands           HandHistory[]
+
+  @@map("games")
+}
+
+model GamePlayer {
+  id           String  @id @default(cuid())
+  gameId       String  @map("game_id")
+  seatNumber   Int     @map("seat_number")
+  agentType    String  @map("agent_type")
+  agentName    String  @map("agent_name")
+  userId       String? @map("user_id")
+  currentChips Int     @map("current_chips")
+  status       String  @default("active")
+  handsWon     Int     @default(0) @map("hands_won")
+  totalProfit  Int     @default(0) @map("total_profit")
+  game         Game    @relation(fields: [gameId], references: [id])
+  user         User?   @relation(fields: [userId], references: [id])
+
+  @@map("game_players")
+}
+
+model HandHistory {
+  id             String   @id @default(cuid())
+  gameId         String   @map("game_id")
+  handNumber     Int      @map("hand_number")
+  dealerSeat     Int      @map("dealer_seat")
+  communityCards String   @map("community_cards")
+  potTotal       Int      @map("pot_total")
+  actions        String
+  winners        String
+  createdAt      DateTime @default(now()) @map("created_at")
+  game           Game     @relation(fields: [gameId], references: [id])
+
+  @@map("hand_history")
+}
